@@ -86,16 +86,13 @@
 .\_build\main.o: ..\..\..\..\..\..\components\boards\pca10040.h
 .\_build\main.o: ..\..\..\..\..\..\components\libraries\button\app_button.h
 .\_build\main.o: ..\..\..\..\..\..\components\libraries\pwr_mgmt\nrf_pwr_mgmt.h
+.\_build\main.o: ..\..\..\ppi_Gpiote.h
 .\_build\main.o: ..\..\..\..\..\..\modules\nrfx\hal\nrf_uart.h
 .\_build\main.o: ..\..\..\..\..\..\modules\nrfx\hal\nrf_uarte.h
 .\_build\main.o: ..\..\..\..\..\..\components\ble\ble_services\ble_dfu\ble_dfu.h
 .\_build\main.o: ..\..\..\..\..\..\components\libraries\log\nrf_log.h
-.\_build\main.o: ..\..\..\..\..\..\components\libraries\strerror\nrf_strerror.h
 .\_build\main.o: ..\..\..\..\..\..\components\libraries\log\src\nrf_log_internal.h
 .\_build\main.o: ..\..\..\..\..\..\components\libraries\log\nrf_log_ctrl.h
 .\_build\main.o: ..\..\..\..\..\..\components\libraries\log\src\nrf_log_ctrl_internal.h
 .\_build\main.o: ..\..\..\..\..\..\components\libraries\log\nrf_log_backend_interface.h
-.\_build\main.o: ..\..\..\..\..\..\components\libraries\memobj\nrf_memobj.h
-.\_build\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
-.\_build\main.o: ..\..\..\..\..\..\components\libraries\balloc\nrf_balloc.h
 .\_build\main.o: ..\..\..\..\..\..\components\libraries\log\nrf_log_default_backends.h

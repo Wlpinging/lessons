@@ -68,7 +68,7 @@
 #include "app_util_platform.h"
 #include "bsp_btn_ble.h"
 #include "nrf_pwr_mgmt.h"
-
+#include "ppi_Gpiote.h"
 #if defined (UART_PRESENT)
 #include "nrf_uart.h"
 #endif
@@ -95,7 +95,12 @@
 
 #define APP_ADV_INTERVAL                64                                          /**< The advertising interval (in units of 0.625 ms. This value corresponds to 40 ms). */
 
-#define APP_ADV_DURATION                18000                                       /**< The advertising duration (180 seconds) in units of 10 milliseconds. */
+#define APP_ADV_DURATION                500                                         /**< The advertising duration (180 seconds) in units of 10 milliseconds. */
+
+#define APP_ADV_INTERVAL1               800                                          /**< The advertising interval (in units of 0.625 ms. This value corresponds to 40 ms). */
+
+#define APP_ADV_DURATION1               1000                                         /**< The advertising duration (180 seconds) in units of 10 milliseconds. */
+
 
 #define MIN_CONN_INTERVAL               MSEC_TO_UNITS(20, UNIT_1_25_MS)             /**< Minimum acceptable connection interval (20 ms), Connection interval uses 1.25 ms units. */
 #define MAX_CONN_INTERVAL               MSEC_TO_UNITS(75, UNIT_1_25_MS)             /**< Maximum acceptable connection interval (75 ms), Connection interval uses 1.25 ms units. */
@@ -123,6 +128,22 @@ static ble_uuid_t m_adv_uuids[]          =                                      
     {BLE_UUID_NUS_SERVICE, NUS_SERVICE_UUID_TYPE}
 };
 
+APP_TIMER_DEF(SendTimer);
+void bsp_event_handler(bsp_event_t event);
+void ppi_Setting(void);
+void advertising_start(void);
+static void uart_init(void);
+
+void SendTimer_handler(void * p_context)
+{	
+	advertising_start();
+
+}
+void init_timer(void)
+{	
+	app_timer_create(&SendTimer, APP_TIMER_MODE_SINGLE_SHOT, SendTimer_handler);
+	
+}
 
 /**@brief Function for assert macro callback.
  *
@@ -311,6 +332,8 @@ static void ble_dfu_evt_handler(ble_dfu_buttonless_evt_type_t event)
 
 /**@brief Function for initializing services that will be used by the application.
  */
+extern uint32_t dis_service_init(void);
+
 static void services_init(void)
 {
     uint32_t           err_code;
@@ -329,6 +352,9 @@ static void services_init(void)
     nus_init.data_handler = nus_data_handler;
 
     err_code = ble_nus_init(&m_nus, &nus_init);
+    APP_ERROR_CHECK(err_code);
+		
+		err_code = dis_service_init();
     APP_ERROR_CHECK(err_code);
 		
 #ifdef DFU_SUPPORT
@@ -440,11 +466,22 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
     switch (ble_adv_evt)
     {
         case BLE_ADV_EVT_FAST:
+						NRF_LOG_INFO("Debug BLE_ADV_EVT_FAST.");
             err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
+						Timer_TohalfSecond();
+            APP_ERROR_CHECK(err_code);
+            break;
+				case BLE_ADV_EVT_SLOW:
+						NRF_LOG_INFO("Debug BLE_ADV_EVT_SLOW.");
+            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_SLOW);
+						Timer_To1Second();
             APP_ERROR_CHECK(err_code);
             break;
         case BLE_ADV_EVT_IDLE:
-            sleep_mode_enter();
+						NRF_LOG_INFO("Debug BLE_ADV_EVT_IDLE.");
+						Timer_Disable();
+            app_timer_start(SendTimer,   APP_TIMER_TICKS(5000),     NULL);
+//						sleep_mode_enter();
             break;
         default:
             break;
@@ -546,6 +583,12 @@ static void ble_stack_init(void)
 
     // Register a handler for BLE events.
     NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, ble_evt_handler, NULL);
+	
+		err_code = sd_power_mode_set(NRF_POWER_MODE_LOWPWR);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
+    APP_ERROR_CHECK(err_code);
 }
 
 
@@ -725,6 +768,11 @@ static void advertising_init(void)
     init.config.ble_adv_fast_enabled  = true;
     init.config.ble_adv_fast_interval = APP_ADV_INTERVAL;
     init.config.ble_adv_fast_timeout  = APP_ADV_DURATION;
+	
+		init.config.ble_adv_slow_enabled  = true;
+    init.config.ble_adv_slow_interval = APP_ADV_INTERVAL1;
+    init.config.ble_adv_slow_timeout  = APP_ADV_DURATION1;
+	
     init.evt_handler = on_adv_evt;
 
     err_code = ble_advertising_init(&m_advertising, &init);
@@ -797,15 +845,19 @@ static void advertising_start(void)
 
 /**@brief Application main function.
  */
+
+
 int main(void)
 {
     bool erase_bonds;
-
-    // Initialize.
-    uart_init();
+		if(NRF_LOG_ENABLED == 1)
+			uart_init();
     log_init();
+		init_timer();
     timers_init();
-    buttons_leds_init(&erase_bonds);
+		ppi_Setting();
+		if(NRF_LOG_ENABLED == 1)
+			buttons_leds_init(&erase_bonds);
     power_management_init();
     ble_stack_init();
     gap_params_init();
@@ -814,11 +866,12 @@ int main(void)
     advertising_init();
     conn_params_init();
 
-    // Start execution.
-    printf("\r\nUART started.\r\n");
+    if(NRF_LOG_ENABLED == 1)
+			printf("\r\nUART started.\r\n");
     NRF_LOG_INFO("Debug logging for UART over RTT started.");
+		
     advertising_start();
-
+		
     // Enter main loop.
     for (;;)
     {
