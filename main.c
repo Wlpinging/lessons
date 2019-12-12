@@ -56,6 +56,7 @@
 #include "ble_hci.h"
 #include "ble_advdata.h"
 #include "ble_advertising.h"
+#include "ble_bas.h"
 #include "ble_conn_params.h"
 #include "nrf_sdh.h"
 #include "nrf_sdh_soc.h"
@@ -88,7 +89,7 @@
 
 #define APP_BLE_CONN_CFG_TAG            1                                           /**< A tag identifying the SoftDevice BLE configuration. */
 
-#define DEVICE_NAME                     "Nordic_UART"                               /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "William_UART"                               /**< Name of device. Will be included in the advertising data. */
 #define NUS_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN                  /**< UUID type for the Nordic UART Service (vendor specific). */
 
 #define APP_BLE_OBSERVER_PRIO           3                                           /**< Application's BLE observer priority. You shouldn't need to modify this value. */
@@ -101,6 +102,7 @@
 
 #define APP_ADV_DURATION1               1000                                         /**< The advertising duration (180 seconds) in units of 10 milliseconds. */
 
+#define BATTERY_LEVEL_MEAS_INTERVAL     APP_TIMER_TICKS(2000)                   		 /**< Battery level measurement interval (ticks). */
 
 #define MIN_CONN_INTERVAL               MSEC_TO_UNITS(20, UNIT_1_25_MS)             /**< Minimum acceptable connection interval (20 ms), Connection interval uses 1.25 ms units. */
 #define MAX_CONN_INTERVAL               MSEC_TO_UNITS(75, UNIT_1_25_MS)             /**< Maximum acceptable connection interval (75 ms), Connection interval uses 1.25 ms units. */
@@ -112,13 +114,17 @@
 
 #define DEAD_BEEF                       0xDEADBEEF                                  /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
+
+BLE_BAS_DEF(m_bas);
+
 #define UART_TX_BUF_SIZE                256                                         /**< UART TX buffer size. */
 #define UART_RX_BUF_SIZE                256                                         /**< UART RX buffer size. */
-
 
 BLE_NUS_DEF(m_nus, NRF_SDH_BLE_TOTAL_LINK_COUNT);                                   /**< BLE NUS service instance. */
 NRF_BLE_GATT_DEF(m_gatt);                                                           /**< GATT module instance. */
 NRF_BLE_QWR_DEF(m_qwr);                                                             /**< Context for the Queued Write module.*/
+
+ 
 BLE_ADVERTISING_DEF(m_advertising);                                                 /**< Advertising module instance. */
 
 static uint16_t   m_conn_handle          = BLE_CONN_HANDLE_INVALID;                 /**< Handle of the current connection. */
@@ -129,11 +135,40 @@ static ble_uuid_t m_adv_uuids[]          =                                      
 };
 
 APP_TIMER_DEF(SendTimer);
+APP_TIMER_DEF(m_battery_timer_id);                                  /**< Battery timer. */
+
 void bsp_event_handler(bsp_event_t event);
 void ppi_Setting(void);
 void advertising_start(void);
 static void uart_init(void);
 
+
+static void battery_level_update(void)
+{
+    ret_code_t err_code;
+    static uint8_t  battery_level = 100;
+
+
+    battery_level++;
+		err_code = ble_bas_battery_level_update(&m_bas, battery_level, BLE_CONN_HANDLE_ALL);
+    if ((err_code != NRF_SUCCESS) &&
+        (err_code != NRF_ERROR_INVALID_STATE) &&
+        (err_code != NRF_ERROR_RESOURCES) &&
+        (err_code != NRF_ERROR_BUSY) &&
+        (err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
+       )
+    {
+        APP_ERROR_HANDLER(err_code);
+    }
+}
+
+static void battery_level_meas_timeout_handler(void * p_context)
+{
+    UNUSED_PARAMETER(p_context);
+    battery_level_update();
+}
+
+/////
 void SendTimer_handler(void * p_context)
 {	
 	advertising_start();
@@ -141,8 +176,10 @@ void SendTimer_handler(void * p_context)
 }
 void init_timer(void)
 {	
-	app_timer_create(&SendTimer, APP_TIMER_MODE_SINGLE_SHOT, SendTimer_handler);
+	ret_code_t err_code;
 	
+	app_timer_create(&SendTimer, APP_TIMER_MODE_SINGLE_SHOT, SendTimer_handler);
+
 }
 
 /**@brief Function for assert macro callback.
@@ -166,6 +203,14 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
 static void timers_init(void)
 {
     ret_code_t err_code = app_timer_init();
+    APP_ERROR_CHECK(err_code);
+	
+		err_code = app_timer_create(&m_battery_timer_id,
+                                APP_TIMER_MODE_REPEATED,
+                                battery_level_meas_timeout_handler);
+		APP_ERROR_CHECK(err_code);
+    // Start application timers.
+    err_code = app_timer_start(m_battery_timer_id, BATTERY_LEVEL_MEAS_INTERVAL, NULL);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -338,6 +383,7 @@ static void services_init(void)
 {
     uint32_t           err_code;
     ble_nus_init_t     nus_init;
+		ble_bas_init_t     bas_init;
     nrf_ble_qwr_init_t qwr_init = {0};
 
     // Initialize Queued Write Module.
@@ -354,26 +400,42 @@ static void services_init(void)
     err_code = ble_nus_init(&m_nus, &nus_init);
     APP_ERROR_CHECK(err_code);
 		
+		// Initialize Battery Service.
+    memset(&bas_init, 0, sizeof(bas_init));
+
+    bas_init.evt_handler          = NULL;
+    bas_init.support_notification = true;
+    bas_init.p_report_ref         = NULL;
+    bas_init.initial_batt_level   = 100;
+
+    // Here the sec level for the Battery Service can be changed/increased.
+    bas_init.bl_rd_sec        = SEC_OPEN;
+    bas_init.bl_cccd_wr_sec   = SEC_OPEN;
+    bas_init.bl_report_rd_sec = SEC_OPEN;
+
+    err_code = ble_bas_init(&m_bas, &bas_init);
+    APP_ERROR_CHECK(err_code);
+		
 		err_code = dis_service_init();
     APP_ERROR_CHECK(err_code);
 		
-#ifdef DFU_SUPPORT
+//#ifdef DFU_SUPPORT
 
-    ble_dfu_buttonless_init_t dfus_init = {0};
+//    ble_dfu_buttonless_init_t dfus_init = {0};
 
-    // Initialize the async SVCI interface to bootloader.
+//    // Initialize the async SVCI interface to bootloader.
 
-    err_code = ble_dfu_buttonless_async_svci_init();
+//    err_code = ble_dfu_buttonless_async_svci_init();
 
-    APP_ERROR_CHECK(err_code); 
+//    APP_ERROR_CHECK(err_code); 
 
-    dfus_init.evt_handler = ble_dfu_evt_handler; 
+//    dfus_init.evt_handler = ble_dfu_evt_handler; 
 
-    err_code = ble_dfu_buttonless_init(&dfus_init);
+//    err_code = ble_dfu_buttonless_init(&dfus_init);
 
-    APP_ERROR_CHECK(err_code);
+//    APP_ERROR_CHECK(err_code);
 
-#endif
+//#endif
 		
 }
 
@@ -841,6 +903,9 @@ static void advertising_start(void)
     uint32_t err_code = ble_advertising_start(&m_advertising, BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);
 }
+
+
+
 
 
 /**@brief Application main function.
