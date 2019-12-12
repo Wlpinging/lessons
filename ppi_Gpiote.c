@@ -6,17 +6,30 @@
 #include "nrf_gpio.h"
 #include "boards.h"
 #include "nrf_drv_ppi.h"
-#include "nrf_drv_timer.h"
+#include "app_timer.h"
 #include "nrf_drv_gpiote.h"
+#include "nrf_drv_timer.h"
 #include "app_error.h"
+//#define PPIGPIO    1
 
-#ifdef BSP_LED_2
-    #define GPIO_OUTPUT_PIN_NUMBER BSP_LED_2  /**< Pin number for output. */
+
+
+#ifdef PPIGPIO
+
+#else
+	#define LESSON3_LED2_MEAS_INTERVAL1      APP_TIMER_TICKS(500)       /**LED2 level measurement interval (ticks). */
+	#define LESSON3_LED2_MEAS_INTERVAL2      APP_TIMER_TICKS(1000)       /**LED2 level measurement interval (ticks). */
+	APP_TIMER_DEF(Lesson3LedTimer);
+#endif
+
+#ifdef BSP_LED_1
+    #define GPIO_OUTPUT_PIN_NUMBER BSP_LED_1  /**< Pin number for output. */
 #endif
 #ifndef GPIO_OUTPUT_PIN_NUMBER
     #error "Please indicate output pin"
 #endif
 
+#ifdef PPIGPIO 
 static nrf_drv_timer_t timer2 = NRF_DRV_TIMER_INSTANCE(1);
 
 void timer_dummy_handler(nrf_timer_event_t event_type, void * p_context){}
@@ -78,22 +91,54 @@ void ppi_Setting(void)
     nrf_drv_timer_enable(&timer2);
 
 }
+#else
+void Lesson3LedTimer_handler(void * p_context)
+{
+		nrf_gpio_pin_toggle(GPIO_OUTPUT_PIN_NUMBER);
+}
+void ppi_Setting(void)
+{
+    nrf_gpio_cfg_output(GPIO_OUTPUT_PIN_NUMBER);
+		nrf_gpio_pin_write(GPIO_OUTPUT_PIN_NUMBER,0);
+		app_timer_create(&Lesson3LedTimer, APP_TIMER_MODE_REPEATED, Lesson3LedTimer_handler);
+		app_timer_start(Lesson3LedTimer, LESSON3_LED2_MEAS_INTERVAL1, NULL);
+}
+
+#endif
 
 void Timer_To1Second(void)
 {
-		nrf_drv_timer_disable(&timer2);
-		nrf_drv_timer_extended_compare(&timer2, (nrf_timer_cc_channel_t)0, 1000 * 1000UL, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, false);
-		nrf_drv_timer_enable(&timer2);
+		#ifdef PPIGPIO
+		{
+			nrf_drv_timer_disable(&timer2);
+			nrf_drv_timer_extended_compare(&timer2, (nrf_timer_cc_channel_t)0, 1000 * 1000UL, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, false);
+			nrf_drv_timer_enable(&timer2);
+		}
+		#else
+		app_timer_stop(Lesson3LedTimer);
+		app_timer_create(&Lesson3LedTimer, APP_TIMER_MODE_REPEATED, Lesson3LedTimer_handler);
+		app_timer_start(Lesson3LedTimer, LESSON3_LED2_MEAS_INTERVAL2, NULL);	
+		#endif
 }
 
 void Timer_Disable(void)
 {
+		#ifdef PPIGPIO
 		nrf_drv_timer_disable(&timer2);
-		//nrf_drv_timer_extended_compare(&timer2, (nrf_timer_cc_channel_t)0, 1000 * 1000UL, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, false);
+		#else
+		app_timer_stop(Lesson3LedTimer);
+		#endif
 }
 
 void Timer_TohalfSecond(void)
 {
+		#ifdef PPIGPIO
 		nrf_drv_timer_extended_compare(&timer2, (nrf_timer_cc_channel_t)0, 500 * 1000UL, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, false);
 		nrf_drv_timer_enable(&timer2);
+		#else
+		app_timer_stop(Lesson3LedTimer);
+		app_timer_create(&Lesson3LedTimer, APP_TIMER_MODE_REPEATED, Lesson3LedTimer_handler);
+		app_timer_start(Lesson3LedTimer, LESSON3_LED2_MEAS_INTERVAL1, NULL);	
+		#endif
 }
+

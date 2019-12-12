@@ -52,8 +52,13 @@
 .\_build\ppi_gpiote.o: ..\..\..\..\..\..\integration\nrfx\legacy\nrf_drv_ppi.h
 .\_build\ppi_gpiote.o: ..\..\..\..\..\..\modules\nrfx\drivers\include\nrfx_ppi.h
 .\_build\ppi_gpiote.o: ..\..\..\..\..\..\modules\nrfx\hal/nrf_ppi.h
+.\_build\ppi_gpiote.o: ..\..\..\..\..\..\components\libraries\timer\app_timer.h
+.\_build\ppi_gpiote.o: ..\..\..\..\..\..\components\libraries\log\nrf_log_instance.h
+.\_build\ppi_gpiote.o: ..\..\..\..\..\..\components\libraries\experimental_section_vars\nrf_section.h
+.\_build\ppi_gpiote.o: ..\..\..\..\..\..\components\libraries\log\nrf_log_types.h
+.\_build\ppi_gpiote.o: ..\..\..\..\..\..\components\libraries\sortlist\nrf_sortlist.h
+.\_build\ppi_gpiote.o: ..\..\..\..\..\..\integration\nrfx\legacy\nrf_drv_gpiote.h
+.\_build\ppi_gpiote.o: ..\..\..\..\..\..\modules\nrfx\drivers\include\nrfx_gpiote.h
 .\_build\ppi_gpiote.o: ..\..\..\..\..\..\integration\nrfx\legacy\nrf_drv_timer.h
 .\_build\ppi_gpiote.o: ..\..\..\..\..\..\modules\nrfx\drivers\include\nrfx_timer.h
 .\_build\ppi_gpiote.o: ..\..\..\..\..\..\modules\nrfx\hal/nrf_timer.h
-.\_build\ppi_gpiote.o: ..\..\..\..\..\..\integration\nrfx\legacy\nrf_drv_gpiote.h
-.\_build\ppi_gpiote.o: ..\..\..\..\..\..\modules\nrfx\drivers\include\nrfx_gpiote.h

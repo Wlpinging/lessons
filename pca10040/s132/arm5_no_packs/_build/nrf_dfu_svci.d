@@ -29,6 +29,7 @@
 .\_build\nrf_dfu_svci.o: ..\..\..\..\..\..\components\libraries\util\sdk_macros.h
 .\_build\nrf_dfu_svci.o: ..\..\..\..\..\..\components\libraries\util\nrf_assert.h
 .\_build\nrf_dfu_svci.o: ..\..\..\..\..\..\components\libraries\experimental_section_vars\nrf_section.h
+.\_build\nrf_dfu_svci.o: ..\..\..\..\..\..\components\libraries\strerror\nrf_strerror.h
 .\_build\nrf_dfu_svci.o: ..\..\..\..\..\..\components\libraries\log\src\nrf_log_internal.h
 .\_build\nrf_dfu_svci.o: ..\..\..\..\..\..\components\libraries\log\nrf_log_instance.h
 .\_build\nrf_dfu_svci.o: ..\..\..\..\..\..\components\libraries\log\nrf_log_types.h

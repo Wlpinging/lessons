@@ -60,4 +60,5 @@
 .\_build\app_button.o: ..\..\..\..\..\..\modules\nrfx\drivers\include\nrfx_gpiote.h
 .\_build\app_button.o: ..\..\..\..\..\..\modules\nrfx\hal/nrf_gpiote.h
 .\_build\app_button.o: ..\..\..\..\..\..\components\libraries\log\nrf_log.h
+.\_build\app_button.o: ..\..\..\..\..\..\components\libraries\strerror\nrf_strerror.h
 .\_build\app_button.o: ..\..\..\..\..\..\components\libraries\log\src\nrf_log_internal.h

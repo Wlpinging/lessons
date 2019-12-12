@@ -56,6 +56,7 @@
 #include "ble_hci.h"
 #include "ble_advdata.h"
 #include "ble_advertising.h"
+#include "nrf_drv_saadc.h"
 #include "ble_bas.h"
 #include "ble_conn_params.h"
 #include "nrf_sdh.h"
@@ -70,6 +71,7 @@
 #include "bsp_btn_ble.h"
 #include "nrf_pwr_mgmt.h"
 #include "ppi_Gpiote.h"
+#include "fds_mem.h"
 #if defined (UART_PRESENT)
 #include "nrf_uart.h"
 #endif
@@ -135,22 +137,42 @@ static ble_uuid_t m_adv_uuids[]          =                                      
 };
 
 APP_TIMER_DEF(SendTimer);
+
 APP_TIMER_DEF(m_battery_timer_id);                                  /**< Battery timer. */
 
 void bsp_event_handler(bsp_event_t event);
-void ppi_Setting(void);
+
 void advertising_start(void);
 static void uart_init(void);
 
 
+
+
+/********************************
+SAADC 2 second to sampleing once
+*********************************/
+void Saadc_init(void)
+{
+    ret_code_t err_code;
+    nrf_saadc_channel_config_t channel_config =
+        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_VDD);
+
+		err_code = nrf_drv_saadc_init(NULL, NULL);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = nrf_drv_saadc_channel_init(0, &channel_config);
+    APP_ERROR_CHECK(err_code);
+
+}
 static void battery_level_update(void)
 {
     ret_code_t err_code;
-    static uint8_t  battery_level = 100;
-
-
-    battery_level++;
-		err_code = ble_bas_battery_level_update(&m_bas, battery_level, BLE_CONN_HANDLE_ALL);
+		nrf_saadc_value_t Saadc_Value = 0;
+    nrf_drv_saadc_sample_convert(0,&Saadc_Value);
+		float voltage=100;
+		voltage=((float)Saadc_Value*36/1024 -18)/18 * 100;
+    NRF_LOG_INFO("voltage=%d,%d%%\n",Saadc_Value,voltage);
+		err_code = ble_bas_battery_level_update(&m_bas, (uint8_t)voltage, BLE_CONN_HANDLE_ALL);
     if ((err_code != NRF_SUCCESS) &&
         (err_code != NRF_ERROR_INVALID_STATE) &&
         (err_code != NRF_ERROR_RESOURCES) &&
@@ -168,18 +190,20 @@ static void battery_level_meas_timeout_handler(void * p_context)
     battery_level_update();
 }
 
-/////
+/* 
+SendTimer timeout handler
+This time is used to set 5 seconds in adv idle mode
+*/
 void SendTimer_handler(void * p_context)
 {	
 	advertising_start();
-
 }
-void init_timer(void)
-{	
-	ret_code_t err_code;
-	
-	app_timer_create(&SendTimer, APP_TIMER_MODE_SINGLE_SHOT, SendTimer_handler);
 
+
+
+void init_timer(void)
+{		
+	app_timer_create(&SendTimer, APP_TIMER_MODE_SINGLE_SHOT, SendTimer_handler);
 }
 
 /**@brief Function for assert macro callback.
@@ -212,6 +236,8 @@ static void timers_init(void)
     // Start application timers.
     err_code = app_timer_start(m_battery_timer_id, BATTERY_LEVEL_MEAS_INTERVAL, NULL);
     APP_ERROR_CHECK(err_code);
+	
+		
 }
 
 /**@brief Function for the GAP initialization.
@@ -419,23 +445,23 @@ static void services_init(void)
 		err_code = dis_service_init();
     APP_ERROR_CHECK(err_code);
 		
-//#ifdef DFU_SUPPORT
+#ifdef DFU_SUPPORT
 
-//    ble_dfu_buttonless_init_t dfus_init = {0};
+    ble_dfu_buttonless_init_t dfus_init = {0};
 
-//    // Initialize the async SVCI interface to bootloader.
+    // Initialize the async SVCI interface to bootloader.
 
-//    err_code = ble_dfu_buttonless_async_svci_init();
+    err_code = ble_dfu_buttonless_async_svci_init();
 
-//    APP_ERROR_CHECK(err_code); 
+    APP_ERROR_CHECK(err_code); 
 
-//    dfus_init.evt_handler = ble_dfu_evt_handler; 
+    dfus_init.evt_handler = ble_dfu_evt_handler; 
 
-//    err_code = ble_dfu_buttonless_init(&dfus_init);
+    err_code = ble_dfu_buttonless_init(&dfus_init);
 
-//    APP_ERROR_CHECK(err_code);
+    APP_ERROR_CHECK(err_code);
 
-//#endif
+#endif
 		
 }
 
@@ -852,7 +878,7 @@ static void buttons_leds_init(bool * p_erase_bonds)
 {
     bsp_event_t startup_event;
 
-    uint32_t err_code = bsp_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS, bsp_event_handler);
+    uint32_t err_code = bsp_init(NULL , bsp_event_handler);
     APP_ERROR_CHECK(err_code);
 
     err_code = bsp_btn_ble_init(NULL, &startup_event);
@@ -905,13 +931,8 @@ static void advertising_start(void)
 }
 
 
-
-
-
 /**@brief Application main function.
  */
-
-
 int main(void)
 {
     bool erase_bonds;
@@ -921,8 +942,6 @@ int main(void)
 		init_timer();
     timers_init();
 		ppi_Setting();
-		if(NRF_LOG_ENABLED == 1)
-			buttons_leds_init(&erase_bonds);
     power_management_init();
     ble_stack_init();
     gap_params_init();
@@ -930,13 +949,13 @@ int main(void)
     services_init();
     advertising_init();
     conn_params_init();
-
+		Saadc_init();
+		fdsmem_init();
     if(NRF_LOG_ENABLED == 1)
 			printf("\r\nUART started.\r\n");
     NRF_LOG_INFO("Debug logging for UART over RTT started.");
 		
-    advertising_start();
-		
+    advertising_start();		
     // Enter main loop.
     for (;;)
     {

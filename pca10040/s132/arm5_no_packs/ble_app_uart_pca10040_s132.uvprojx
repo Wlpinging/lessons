@@ -402,6 +402,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\ppi_Gpiote.c</FilePath>
             </File>
+            <File>
+              <FileName>fds_mem.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\fds_mem.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1632,6 +1637,11 @@
               <FileName>nrf_drv_ppi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\integration\nrfx\legacy\nrf_drv_ppi.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrfx_saadc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_saadc.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -3037,6 +3047,21 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>nrf_fstorage.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\components\libraries\fstorage\nrf_fstorage.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf_fstorage_sd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\components\libraries\fstorage\nrf_fstorage_sd.c</FilePath>
+            </File>
+            <File>
+              <FileName>fds.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\components\libraries\fds\fds.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -4094,6 +4119,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\ppi_Gpiote.c</FilePath>
             </File>
+            <File>
+              <FileName>fds_mem.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\fds_mem.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -5324,6 +5354,11 @@
               <FileName>nrf_drv_ppi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\integration\nrfx\legacy\nrf_drv_ppi.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrfx_saadc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_saadc.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -6729,6 +6764,21 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>nrf_fstorage.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\components\libraries\fstorage\nrf_fstorage.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf_fstorage_sd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\components\libraries\fstorage\nrf_fstorage_sd.c</FilePath>
+            </File>
+            <File>
+              <FileName>fds.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\components\libraries\fds\fds.c</FilePath>
             </File>
           </Files>
         </Group>

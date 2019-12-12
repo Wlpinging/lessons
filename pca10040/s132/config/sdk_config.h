@@ -3250,7 +3250,7 @@
 // <e> NRFX_SAADC_ENABLED - nrfx_saadc - SAADC peripheral driver
 //==========================================================
 #ifndef NRFX_SAADC_ENABLED
-#define NRFX_SAADC_ENABLED 0
+#define NRFX_SAADC_ENABLED 1
 #endif
 // <o> NRFX_SAADC_CONFIG_RESOLUTION  - Resolution
  
@@ -5278,7 +5278,7 @@
 // <e> SAADC_ENABLED - nrf_drv_saadc - SAADC peripheral driver - legacy layer
 //==========================================================
 #ifndef SAADC_ENABLED
-#define SAADC_ENABLED 0
+#define SAADC_ENABLED 1
 #endif
 // <o> SAADC_CONFIG_RESOLUTION  - Resolution
  
@@ -6565,7 +6565,7 @@
 // <e> FDS_ENABLED - fds - Flash data storage module
 //==========================================================
 #ifndef FDS_ENABLED
-#define FDS_ENABLED 0
+#define FDS_ENABLED 1
 #endif
 // <h> Pages - Virtual page settings
 
@@ -7089,7 +7089,7 @@
 // <e> NRF_FSTORAGE_ENABLED - nrf_fstorage - Flash abstraction library
 //==========================================================
 #ifndef NRF_FSTORAGE_ENABLED
-#define NRF_FSTORAGE_ENABLED 0
+#define NRF_FSTORAGE_ENABLED 1
 #endif
 // <h> nrf_fstorage - Common settings
 
@@ -7584,7 +7584,7 @@
 // <e> NRF_LOG_ENABLED - nrf_log - Logger
 //==========================================================
 #ifndef NRF_LOG_ENABLED
-#define NRF_LOG_ENABLED 0
+#define NRF_LOG_ENABLED 1
 #endif
 // <h> Log message pool - Configuration of log message pool
 

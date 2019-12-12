@@ -40,6 +40,8 @@
 #ifndef PPI_LED2_H
 #define PPI_LED2_H
 
+void ppi_Setting(void);
+
 /**@brief Function for change led2 blink every 1s in slow mode
  */
 void Timer_To1Second(void);
