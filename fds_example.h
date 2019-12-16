@@ -65,7 +65,7 @@
 typedef struct
 {
     uint32_t boot_count;
-    char     device_name[16];
+    uint32_t device_data;
     bool     config1_on;
     bool     config2_on;
 } configuration_t;

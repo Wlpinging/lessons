@@ -445,23 +445,23 @@ static void services_init(void)
 		err_code = dis_service_init();
     APP_ERROR_CHECK(err_code);
 		
-#ifdef DFU_SUPPORT
+//#ifdef DFU_SUPPORT
 
-    ble_dfu_buttonless_init_t dfus_init = {0};
+//    ble_dfu_buttonless_init_t dfus_init = {0};
 
-    // Initialize the async SVCI interface to bootloader.
+//    // Initialize the async SVCI interface to bootloader.
 
-    err_code = ble_dfu_buttonless_async_svci_init();
+//    err_code = ble_dfu_buttonless_async_svci_init();
 
-    APP_ERROR_CHECK(err_code); 
+//    APP_ERROR_CHECK(err_code); 
 
-    dfus_init.evt_handler = ble_dfu_evt_handler; 
+//    dfus_init.evt_handler = ble_dfu_evt_handler; 
 
-    err_code = ble_dfu_buttonless_init(&dfus_init);
+//    err_code = ble_dfu_buttonless_init(&dfus_init);
 
-    APP_ERROR_CHECK(err_code);
+//    APP_ERROR_CHECK(err_code);
 
-#endif
+//#endif
 		
 }
 
@@ -752,6 +752,19 @@ void bsp_event_handler(bsp_event_t event)
  *          'new line' '\n' (hex 0x0A) or if the string has reached the maximum data length.
  */
 /**@snippet [Handling the data received over UART] */
+typedef uint32_t (* Profile_Read_handler_t) (void);
+typedef void (* Profile_Write_handler_t) (uint32_t p_data);
+typedef void (* Profile_Update_handler_t) (void);
+typedef struct
+{
+    Profile_Read_handler_t Read_handler; /**< Read_handler to sepcified interface. */
+		Profile_Write_handler_t Write_handler;
+		Profile_Update_handler_t Update_handler;
+} _nus_interface;
+
+static _nus_interface nus_interface; 
+
+
 void uart_event_handle(app_uart_evt_t * p_event)
 {
     static uint8_t data_array[BLE_NUS_MAX_DATA_LEN];
@@ -833,6 +846,9 @@ static void uart_init(void)
                        APP_IRQ_PRIORITY_LOWEST,
                        err_code);
     APP_ERROR_CHECK(err_code);
+		nus_interface.Read_handler = record_rd;
+		nus_interface.Write_handler = record_write;
+		nus_interface.Update_handler = record_update;
 }
 /**@snippet [UART Initialization] */
 
@@ -951,6 +967,8 @@ int main(void)
     conn_params_init();
 		Saadc_init();
 		fdsmem_init();
+		nus_interface.Update_handler();
+
     if(NRF_LOG_ENABLED == 1)
 			printf("\r\nUART started.\r\n");
     NRF_LOG_INFO("Debug logging for UART over RTT started.");

@@ -78,7 +78,7 @@ static configuration_t m_dummy_cfg =
     .config1_on  = false,
     .config2_on  = true,
     .boot_count  = 0x0,
-    .device_name = "dummy",
+    .device_data = 0x12345567,
 };
 
 /* A record containing dummy configuration data. */
@@ -228,63 +228,92 @@ int fdsmem_init(void)
 
     NRF_LOG_INFO("Found %d valid records.", stat.valid_records);
     NRF_LOG_INFO("Found %d dirty records (ready to be garbage collected).", stat.dirty_records);
-
-    fds_record_desc_t desc = {0};
-    fds_find_token_t  tok  = {0};
-
-    rc = fds_record_find(CONFIG_FILE, CONFIG_REC_KEY, &desc, &tok);
-
-    if (rc == NRF_SUCCESS)
-    {
-        /* A config file is in flash. Let's update it. */
-        fds_flash_record_t config = {0};
-
-        /* Open the record and read its contents. */
-        rc = fds_record_open(&desc, &config);
-        APP_ERROR_CHECK(rc);
-
-        /* Copy the configuration from flash into m_dummy_cfg. */
-        memcpy(&m_dummy_cfg, config.p_data, sizeof(configuration_t));
-
-        NRF_LOG_INFO("Config file found, updating boot count to %d.", m_dummy_cfg.boot_count);
-
-        /* Update boot count. */
-        m_dummy_cfg.boot_count++;
-
-        /* Close the record when done reading. */
-        rc = fds_record_close(&desc);
-        APP_ERROR_CHECK(rc);
-
-        /* Write the updated record to flash. */
-        rc = fds_record_update(&desc, &m_dummy_record);
-        if ((rc != NRF_SUCCESS) && (rc == FDS_ERR_NO_SPACE_IN_FLASH))
-        {
-            NRF_LOG_INFO("No space in flash, delete some records to update the config file.");
-        }
-        else
-        {
-            APP_ERROR_CHECK(rc);
-        }
-    }
-    else
-    {
-        /* System config not found; write a new one. */
-        NRF_LOG_INFO("Writing config file...");
-
-        rc = fds_record_write(&desc, &m_dummy_record);
-        if ((rc != NRF_SUCCESS) && (rc == FDS_ERR_NO_SPACE_IN_FLASH))
-        {
-            NRF_LOG_INFO("No space in flash, delete some records to update the config file.");
-        }
-        else
-        {
-            APP_ERROR_CHECK(rc);
-        }
-    }
-		return 0;
 }
 
 
+
+uint32_t record_rd(void)
+{
+    fds_find_token_t tok   = {0};
+    fds_record_desc_t desc = {0};
+		fds_flash_record_t frec_c = {0};
+    while (fds_record_iterate(&desc, &tok) != FDS_ERR_NOT_FOUND)
+    {
+				ret_code_t rc;    
+				fds_flash_record_t frec = {0};
+        rc = fds_record_open(&desc, &frec);
+        switch (rc)
+        {
+            case NRF_SUCCESS:
+								memcpy((void*)&frec_c,(const void*) &frec,sizeof(fds_flash_record_t));
+                break;
+
+            case FDS_ERR_CRC_CHECK_FAILED:
+                NRF_LOG_INFO("error: CRC check failed!\n");
+                continue;
+
+            case FDS_ERR_NOT_FOUND:
+                NRF_LOG_INFO("error: record not found!\n");
+                continue;
+						
+            default:
+            {
+                NRF_LOG_INFO(  "error: unexpecte error %s.\n",
+                                fds_err_str(rc));
+                continue;
+            }
+        }
+				
+        rc = fds_record_close(&desc);
+        APP_ERROR_CHECK(rc);
+    }
+		NRF_LOG_INFO(		"rec. id\t"
+                    "\tfile id\t"
+                    "\trec. key"
+                    "\tlength\n");
+		if(frec_c.p_header!=0)
+	  {
+				uint32_t const len = frec_c.p_header->length_words * sizeof(uint32_t);
+
+				NRF_LOG_INFO(   " 0x%04x\t"
+                        "\t 0x%04x\t"
+                        "\t 0x%04x\t"
+                        "\t %4u bytes\n",
+                        frec_c.p_header->record_id,
+                        frec_c.p_header->file_id,
+                        frec_c.p_header->record_key,
+                        len);
+				configuration_t* conf = (configuration_t* )frec_c.p_data;
+				return conf->device_data;
+		}
+		else return 0;
+}
+
+
+void record_write( uint32_t p_data)
+{
+		uint32_t fid = 0x8;
+		uint32_t key = 0x9;
+		m_dummy_cfg.device_data = p_data;
+    fds_record_t const rec =
+    {
+        .file_id           = fid,
+        .key               = key,
+        .data.p_data       = &m_dummy_cfg,
+        .data.length_words = (sizeof(m_dummy_cfg) + 3) / sizeof(uint32_t)
+    };
+    ret_code_t rc = fds_record_write(NULL, &rec);
+    if (rc != NRF_SUCCESS)
+    {
+        NRF_LOG_INFO("error: fds_record_write() returned %s.\n", fds_err_str(rc));
+    }
+}
+
+void record_update(void)
+{
+			record_write(record_rd()+1);
+			NRF_LOG_INFO("data is%8x.",record_rd());
+}
 /**
  * @}
  */

@@ -39,19 +39,24 @@
  */
 #ifndef FDS_MEM_H
 #define FDS_MEM_H
-
+#include "stdint.h"
 /**@brief Function for change led2 blink every 1s in slow mode
  */
 int fdsmem_init(void);
 
-/**@brief Function for change led2 blink every 1s in slow mode
+/**@brief Function for fds record read
  */
+uint32_t record_rd(void);
 
-/**@brief Function for change led2 off in idle mode
+/**@brief Function for fds record write
  */
+void record_write( uint32_t p_data);
 
-/**@brief Function for change led2 blink every 0.5s in fast mode
+/**@brief Function for fds record update last value
  */
+void record_update(void);
+	
+//uint32_t Command[4]={ void *(0), fds_record_read,fds_record_write,fds_record_update};
 
 
 #endif
