@@ -407,6 +407,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\fds_mem.c</FilePath>
             </File>
+            <File>
+              <FileName>spi_trans.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\spi_trans.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1642,6 +1647,21 @@
               <FileName>nrfx_saadc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_saadc.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf_drv_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\integration\nrfx\legacy\nrf_drv_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrfx_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrfx_spim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_spim.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -4124,6 +4144,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\fds_mem.c</FilePath>
             </File>
+            <File>
+              <FileName>spi_trans.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\spi_trans.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -5359,6 +5384,21 @@
               <FileName>nrfx_saadc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_saadc.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf_drv_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\integration\nrfx\legacy\nrf_drv_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrfx_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrfx_spim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_spim.c</FilePath>
             </File>
           </Files>
         </Group>

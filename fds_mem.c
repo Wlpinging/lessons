@@ -228,6 +228,8 @@ int fdsmem_init(void)
 
     NRF_LOG_INFO("Found %d valid records.", stat.valid_records);
     NRF_LOG_INFO("Found %d dirty records (ready to be garbage collected).", stat.dirty_records);
+			
+		return 1;
 }
 
 
@@ -311,7 +313,9 @@ void record_write( uint32_t p_data)
 
 void record_update(void)
 {
-			record_write(record_rd()+1);
+			static uint32_t PreValue =0;
+			PreValue= record_rd() + 1;
+			record_write(PreValue);
 			NRF_LOG_INFO("data is%8x.",record_rd());
 }
 /**

@@ -46,6 +46,60 @@
 #ifdef USE_APP_CONFIG
 #include "app_config.h"
 #endif
+
+// <h> Application 
+
+//==========================================================
+// <h> SPI_CONFIGURATION - Spi configuration
+
+//==========================================================
+// <o> SPI_SCK_PIN  - Pin number
+
+
+#ifndef SPI_SCK_PIN
+#define SPI_SCK_PIN 26
+#endif
+
+// <o> SPI_MISO_PIN  - Pin number
+
+
+#ifndef SPI_MISO_PIN
+#define SPI_MISO_PIN 30
+#endif
+
+// <o> SPI_MOSI_PIN  - Pin number
+
+#ifndef SPI_MOSI_PIN
+#define SPI_MOSI_PIN 29
+#endif
+
+// <o> SPI_SS_PIN  - Pin number
+
+
+#ifndef SPI_SS_PIN
+#define SPI_SS_PIN 31
+#endif
+
+// <o> SPI_IRQ_PRIORITY  - Interrupt priority
+ 
+
+// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef SPI_IRQ_PRIORITY
+#define SPI_IRQ_PRIORITY 6
+#endif
+
+// </h> 
+//==========================================================
+
 // <h> Board Support 
 
 //==========================================================
@@ -3357,7 +3411,7 @@
 // <e> NRFX_SPIM_ENABLED - nrfx_spim - SPIM peripheral driver
 //==========================================================
 #ifndef NRFX_SPIM_ENABLED
-#define NRFX_SPIM_ENABLED 0
+#define NRFX_SPIM_ENABLED 1
 #endif
 // <q> NRFX_SPIM0_ENABLED  - Enable SPIM0 instance
  
@@ -3402,7 +3456,7 @@
 // <7=> 7 
 
 #ifndef NRFX_SPIM_DEFAULT_CONFIG_IRQ_PRIORITY
-#define NRFX_SPIM_DEFAULT_CONFIG_IRQ_PRIORITY 6
+#define NRFX_SPIM_DEFAULT_CONFIG_IRQ_PRIORITY 3
 #endif
 
 // <e> NRFX_SPIM_CONFIG_LOG_ENABLED - Enables logging in the module.
@@ -3597,7 +3651,7 @@
 // <e> NRFX_SPI_ENABLED - nrfx_spi - SPI peripheral driver
 //==========================================================
 #ifndef NRFX_SPI_ENABLED
-#define NRFX_SPI_ENABLED 0
+#define NRFX_SPI_ENABLED 1
 #endif
 // <q> NRFX_SPI0_ENABLED  - Enable SPI0 instance
  
@@ -3642,7 +3696,7 @@
 // <7=> 7 
 
 #ifndef NRFX_SPI_DEFAULT_CONFIG_IRQ_PRIORITY
-#define NRFX_SPI_DEFAULT_CONFIG_IRQ_PRIORITY 6
+#define NRFX_SPI_DEFAULT_CONFIG_IRQ_PRIORITY 3
 #endif
 
 // <e> NRFX_SPI_CONFIG_LOG_ENABLED - Enables logging in the module.
@@ -5429,7 +5483,7 @@
 // <e> SPI_ENABLED - nrf_drv_spi - SPI/SPIM peripheral driver - legacy layer
 //==========================================================
 #ifndef SPI_ENABLED
-#define SPI_ENABLED 0
+#define SPI_ENABLED 1
 #endif
 // <o> SPI_DEFAULT_CONFIG_IRQ_PRIORITY  - Interrupt priority
  
@@ -5445,7 +5499,7 @@
 // <7=> 7 
 
 #ifndef SPI_DEFAULT_CONFIG_IRQ_PRIORITY
-#define SPI_DEFAULT_CONFIG_IRQ_PRIORITY 6
+#define SPI_DEFAULT_CONFIG_IRQ_PRIORITY 3
 #endif
 
 // <o> NRF_SPI_DRV_MISO_PULLUP_CFG  - MISO PIN pull-up configuration.
@@ -5489,7 +5543,7 @@
 // <e> SPI2_ENABLED - Enable SPI2 instance
 //==========================================================
 #ifndef SPI2_ENABLED
-#define SPI2_ENABLED 0
+#define SPI2_ENABLED 1
 #endif
 // <q> SPI2_USE_EASY_DMA  - Use EasyDMA
  

@@ -55,6 +55,36 @@ void record_write( uint32_t p_data);
 /**@brief Function for fds record update last value
  */
 void record_update(void);
+
+/**@brief Function for spi record read last value
+ */
+uint32_t spi_read(void);
+
+/**@brief Function for spi write read last value
+ */
+void spi_write(uint8_t * ptr);
+
+/**@brief Function for spi write update last value
+ */
+void spi_update(void);
+
+
+
+typedef uint32_t (* Profile_Read_handler_t) (void);
+typedef void (* Profile_Write_handler_t) (uint32_t p_data);
+typedef void (* Profile_Update_handler_t) (void);
+typedef void (* SPI_Write_handler_t) (uint8_t * p_data);
+typedef struct
+{
+    Profile_Read_handler_t 		fds_Read_handler; /**< Read_handler to sepcified interface. */
+		Profile_Write_handler_t 	fds_Write_handler;
+		Profile_Update_handler_t 	fds_Update_handler;
+		Profile_Read_handler_t 		spi_Read_handler; /**< Read_handler to sepcified interface. */
+		SPI_Write_handler_t 			spi_Write_handler;
+		Profile_Update_handler_t 	spi_Update_handler;
+	
+} _nus_interface;
+
 	
 //uint32_t Command[4]={ void *(0), fds_record_read,fds_record_write,fds_record_update};
 

@@ -128,7 +128,8 @@ NRF_BLE_QWR_DEF(m_qwr);                                                         
 
  
 BLE_ADVERTISING_DEF(m_advertising);                                                 /**< Advertising module instance. */
-
+static uint8_t data_array[BLE_NUS_MAX_DATA_LEN];
+static uint8_t index = 0;
 static uint16_t   m_conn_handle          = BLE_CONN_HANDLE_INVALID;                 /**< Handle of the current connection. */
 static uint16_t   m_ble_nus_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - 3;            /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
 static ble_uuid_t m_adv_uuids[]          =                                          /**< Universally unique service identifier. */
@@ -137,14 +138,13 @@ static ble_uuid_t m_adv_uuids[]          =                                      
 };
 
 APP_TIMER_DEF(SendTimer);
-
+APP_TIMER_DEF(UartTimer);
 APP_TIMER_DEF(m_battery_timer_id);                                  /**< Battery timer. */
 
 void bsp_event_handler(bsp_event_t event);
-
 void advertising_start(void);
 static void uart_init(void);
-
+static _nus_interface nus_interface; 
 
 
 
@@ -199,11 +199,51 @@ void SendTimer_handler(void * p_context)
 	advertising_start();
 }
 
+void UartTimer_handler(void * p_context)
+{
+		if(index < 2)
+				return ;
+		if(data_array[0] > 9)
+				return ;
+		if(data_array[1] > 16)
+				return ;
 
-
+		if(data_array[0] == 2)
+		{
+					NRF_LOG_INFO("fds readback value=%d\n",nus_interface.fds_Read_handler());
+		}
+		else if(data_array[0] == 1)
+		{
+					nus_interface.fds_Write_handler((data_array[2]<<24)+(data_array[3]<<16)+(data_array[4]<<8)+data_array[5]);
+					NRF_LOG_INFO("fds Write_OK");
+		}
+		else if(data_array[0] == 3)
+		{
+					nus_interface.fds_Update_handler();
+					NRF_LOG_INFO("fds Update_OK");
+		}
+		else if(data_array[0] == 5)
+		{
+					uint32_t ptr=spi_read();
+					NRF_LOG_INFO("spi readback %8x",ptr);
+		}
+		else if(data_array[0] == 4)
+		{	
+					nus_interface.spi_Write_handler(data_array+2 );
+					NRF_LOG_INFO("fds Write_OK");
+		}
+		else if(data_array[0] == 6)
+		{
+					nus_interface.spi_Update_handler();
+					NRF_LOG_INFO("fds Update_OK");
+		}
+		index = 0;
+		memset(data_array, 0, sizeof(data_array));
+}
 void init_timer(void)
 {		
 	app_timer_create(&SendTimer, APP_TIMER_MODE_SINGLE_SHOT, SendTimer_handler);
+	app_timer_create(&UartTimer, APP_TIMER_MODE_REPEATED, UartTimer_handler);
 }
 
 /**@brief Function for assert macro callback.
@@ -237,7 +277,8 @@ static void timers_init(void)
     err_code = app_timer_start(m_battery_timer_id, BATTERY_LEVEL_MEAS_INTERVAL, NULL);
     APP_ERROR_CHECK(err_code);
 	
-		
+		err_code =  app_timer_start(UartTimer,   APP_TIMER_TICKS(100),     NULL);
+		APP_ERROR_CHECK(err_code);
 }
 
 /**@brief Function for the GAP initialization.
@@ -752,23 +793,10 @@ void bsp_event_handler(bsp_event_t event)
  *          'new line' '\n' (hex 0x0A) or if the string has reached the maximum data length.
  */
 /**@snippet [Handling the data received over UART] */
-typedef uint32_t (* Profile_Read_handler_t) (void);
-typedef void (* Profile_Write_handler_t) (uint32_t p_data);
-typedef void (* Profile_Update_handler_t) (void);
-typedef struct
-{
-    Profile_Read_handler_t Read_handler; /**< Read_handler to sepcified interface. */
-		Profile_Write_handler_t Write_handler;
-		Profile_Update_handler_t Update_handler;
-} _nus_interface;
-
-static _nus_interface nus_interface; 
-
 
 void uart_event_handle(app_uart_evt_t * p_event)
 {
-    static uint8_t data_array[BLE_NUS_MAX_DATA_LEN];
-    static uint8_t index = 0;
+
     uint32_t       err_code;
 
     switch (p_event->evt_type)
@@ -776,31 +804,10 @@ void uart_event_handle(app_uart_evt_t * p_event)
         case APP_UART_DATA_READY:
             UNUSED_VARIABLE(app_uart_get(&data_array[index]));
             index++;
-
-            if ((data_array[index - 1] == '\n') ||
-                (data_array[index - 1] == '\r') ||
-                (index >= m_ble_nus_max_data_len))
-            {
-                if (index > 1)
-                {
-                    NRF_LOG_DEBUG("Ready to send data over BLE NUS");
-                    NRF_LOG_HEXDUMP_DEBUG(data_array, index);
-
-                    do
-                    {
-                        uint16_t length = (uint16_t)index;
-                        err_code = ble_nus_data_send(&m_nus, data_array, &length, m_conn_handle);
-                        if ((err_code != NRF_ERROR_INVALID_STATE) &&
-                            (err_code != NRF_ERROR_RESOURCES) &&
-                            (err_code != NRF_ERROR_NOT_FOUND))
-                        {
-                            APP_ERROR_CHECK(err_code);
-                        }
-                    } while (err_code == NRF_ERROR_RESOURCES);
-                }
-
-                index = 0;
-            }
+						if(index >= BLE_NUS_MAX_DATA_LEN)
+								index = 0;
+            app_timer_stop(UartTimer);				
+					  app_timer_start(UartTimer,   APP_TIMER_TICKS(100),     NULL);
             break;
 
         case APP_UART_COMMUNICATION_ERROR:
@@ -846,9 +853,12 @@ static void uart_init(void)
                        APP_IRQ_PRIORITY_LOWEST,
                        err_code);
     APP_ERROR_CHECK(err_code);
-		nus_interface.Read_handler = record_rd;
-		nus_interface.Write_handler = record_write;
-		nus_interface.Update_handler = record_update;
+		nus_interface.fds_Read_handler = record_rd;
+		nus_interface.fds_Write_handler = record_write;
+		nus_interface.fds_Update_handler = record_update;
+		nus_interface.spi_Read_handler = spi_read;
+		nus_interface.spi_Write_handler = spi_write;
+		nus_interface.spi_Update_handler = spi_update;
 }
 /**@snippet [UART Initialization] */
 
@@ -951,9 +961,7 @@ static void advertising_start(void)
  */
 int main(void)
 {
-    bool erase_bonds;
-		if(NRF_LOG_ENABLED == 1)
-			uart_init();
+		uart_init();
     log_init();
 		init_timer();
     timers_init();
@@ -967,10 +975,8 @@ int main(void)
     conn_params_init();
 		Saadc_init();
 		fdsmem_init();
-		nus_interface.Update_handler();
-
-    if(NRF_LOG_ENABLED == 1)
-			printf("\r\nUART started.\r\n");
+		spi_init();
+//		spi_read();
     NRF_LOG_INFO("Debug logging for UART over RTT started.");
 		
     advertising_start();		
