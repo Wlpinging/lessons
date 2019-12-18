@@ -56,6 +56,10 @@ void record_write( uint32_t p_data);
  */
 void record_update(void);
 
+/**@brief Function for spi start sequence
+ */
+void SPI_Interface_init(void);
+
 /**@brief Function for spi record read last value
  */
 uint32_t spi_read(void);

@@ -66,6 +66,9 @@ static const uint8_t m_length = 8;        /**< Transfer length. */
  * @brief SPI user event handler.
  * @param event
  */
+
+extern volatile bool Notify_Flag;
+extern volatile uint8_t Notify_buffer[4]; 
 void spi_event_handler(nrf_drv_spi_evt_t const * p_event,
                        void *                    p_context)
 {
@@ -73,16 +76,21 @@ void spi_event_handler(nrf_drv_spi_evt_t const * p_event,
     if ((m_tx_buf[0] == 'R')&&(m_tx_buf[1] == 'E')&&(m_tx_buf[2] == 'A')&&(m_tx_buf[3] == 'D'))
     {
 				NRF_LOG_INFO("Read completed.Received: ");
-        NRF_LOG_HEXDUMP_INFO(m_rx_buf+4, 4);
+        NRF_LOG_HEXDUMP_INFO(m_rx_buf+4, 4);	
+				memcpy((void*) Notify_buffer,m_rx_buf+4,4);
+				Notify_Flag = 1;
     }
 		else if ((m_tx_buf[0] == 'W')&&(m_tx_buf[1] == 'R')&&(m_tx_buf[2] == 'I')&&(m_tx_buf[3] == 'T'))
     {
 				NRF_LOG_INFO("Write completed. %2x,%2x,%2x,%2x",m_tx_buf[4],m_tx_buf[5],m_tx_buf[6],m_tx_buf[7]);
+				memcpy((void*)Notify_buffer,m_tx_buf+4,4);
+				Notify_Flag = 1;
 		}
 		else if ((m_tx_buf[0] == 'U')&&(m_tx_buf[1] == 'P')&&(m_tx_buf[2] == 'D')&&(m_tx_buf[3] == 'A'))
     {
 				NRF_LOG_INFO("Update completed. ");
-
+				Notify_buffer[3]++;
+				Notify_Flag = 1;				
 		}
 }
 
@@ -97,15 +105,25 @@ void spi_init(void)
 
     NRF_LOG_INFO("SPI example started.");
 }
+void spi_test(void)
+{
+		APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, m_tx_buf, 8, m_rx_buf, m_length));
+}
+
 void spi_uninit(void)
 {
 		nrfx_spim_uninit(&spi.u.spim);
 }
-static uint32_t trans_data = 0x11223344;
 
+void SPI_Interface_init(void)
+{
+		spi_init();
+		spi_test();
+		spi_uninit();
+}
 uint32_t spi_read(void)
 {
-//				spi_init();
+				spi_init();
         // Reset rx buffer and transfer done flag
         memset(m_rx_buf, 0, m_length);
         spi_xfer_done = false;
@@ -115,30 +133,29 @@ uint32_t spi_read(void)
         {
             __WFE();
         }
-//				spi_uninit();
+				spi_uninit();
 				return  ((m_rx_buf[4]<<24)+(m_rx_buf[5]<<16)+(m_rx_buf[6]<<8)+m_rx_buf[7]);
 }
 				
 void spi_write(uint8_t * ptr)				
 {
-//				spi_init();
+				spi_init();
 				memset(m_rx_buf, 0, m_length);
         spi_xfer_done = false;
 				memcpy(m_tx_buf,m_tx_buf2,WRITE_LENGTH);
-				trans_data++;
 				memcpy(m_tx_buf + 4 ,ptr, WRITE_LENGTH);
         APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, m_tx_buf, (WRITE_LENGTH+4), m_rx_buf, m_length));
         while (!spi_xfer_done)
         {
             __WFE();
         }
-//				spi_uninit();
+				spi_uninit();
 				return ;
 }
 
 void spi_update(void)
 {
-//				spi_init();
+				spi_init();
 				memset(m_rx_buf, 0, m_length);
         spi_xfer_done = false;
 				memcpy(m_tx_buf,m_tx_buf3,UPDATE_LENGTH);
@@ -147,6 +164,6 @@ void spi_update(void)
         {
             __WFE();
         }
-//				spi_uninit();
+				spi_uninit();				
 				return ;
 }

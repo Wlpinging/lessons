@@ -199,8 +199,26 @@ void SendTimer_handler(void * p_context)
 	advertising_start();
 }
 
+static  uint16_t length = 4;
+volatile bool Notify_Flag = 0;
+volatile uint8_t Notify_buffer[4] ;
 void UartTimer_handler(void * p_context)
 {
+		if(Notify_Flag)
+		{
+				Notify_Flag= 0 ;
+				uint32_t       err_code;
+				do
+        {
+						err_code = ble_nus_data_send(&m_nus, (uint8_t *)Notify_buffer, &length, m_conn_handle);
+						if ((err_code != NRF_ERROR_INVALID_STATE) &&
+								(err_code != NRF_ERROR_RESOURCES) &&
+								(err_code != NRF_ERROR_NOT_FOUND))
+								{
+                            APP_ERROR_CHECK(err_code);
+								}
+				} while (err_code == NRF_ERROR_RESOURCES);
+		}
 		if(index < 2)
 				return ;
 		if(data_array[0] > 9)
@@ -208,31 +226,31 @@ void UartTimer_handler(void * p_context)
 		if(data_array[1] > 16)
 				return ;
 
-		if(data_array[0] == 2)
+		if((data_array[0] == 2)&&(data_array[1] == 4))
 		{
 					NRF_LOG_INFO("fds readback value=%d\n",nus_interface.fds_Read_handler());
 		}
-		else if(data_array[0] == 1)
+		else if((data_array[0] == 1)&&(data_array[1] == 4))
 		{
 					nus_interface.fds_Write_handler((data_array[2]<<24)+(data_array[3]<<16)+(data_array[4]<<8)+data_array[5]);
 					NRF_LOG_INFO("fds Write_OK");
 		}
-		else if(data_array[0] == 3)
+		else if((data_array[0] == 3)&&(data_array[1] == 0))
 		{
 					nus_interface.fds_Update_handler();
 					NRF_LOG_INFO("fds Update_OK");
 		}
-		else if(data_array[0] == 5)
+		else if((data_array[0] == 5)&&(data_array[1] == 4))
 		{
 					uint32_t ptr=spi_read();
 					NRF_LOG_INFO("spi readback %8x",ptr);
 		}
-		else if(data_array[0] == 4)
+		else if((data_array[0] == 4)&&(data_array[1] == 4))
 		{	
 					nus_interface.spi_Write_handler(data_array+2 );
 					NRF_LOG_INFO("fds Write_OK");
 		}
-		else if(data_array[0] == 6)
+		else if((data_array[0] == 6)&&(data_array[1] == 0))
 		{
 					nus_interface.spi_Update_handler();
 					NRF_LOG_INFO("fds Update_OK");
@@ -975,8 +993,7 @@ int main(void)
     conn_params_init();
 		Saadc_init();
 		fdsmem_init();
-		spi_init();
-//		spi_read();
+		SPI_Interface_init();
     NRF_LOG_INFO("Debug logging for UART over RTT started.");
 		
     advertising_start();		
