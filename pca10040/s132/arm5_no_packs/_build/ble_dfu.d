@@ -48,7 +48,6 @@
 .\_build\ble_dfu.o: ..\..\..\..\..\..\components\libraries\log\nrf_log.h
 .\_build\ble_dfu.o: ..\..\..\..\..\..\components\libraries\util\sdk_common.h
 .\_build\ble_dfu.o: ..\..\..\..\..\..\components\libraries\util\sdk_os.h
-.\_build\ble_dfu.o: ..\..\..\..\..\..\components\libraries\strerror\nrf_strerror.h
 .\_build\ble_dfu.o: ..\..\..\..\..\..\components\libraries\log\src\nrf_log_internal.h
 .\_build\ble_dfu.o: ..\..\..\..\..\..\components\libraries\log\nrf_log_instance.h
 .\_build\ble_dfu.o: ..\..\..\..\..\..\components\libraries\log\nrf_log_types.h

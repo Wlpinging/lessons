@@ -99,7 +99,7 @@ void Lesson3LedTimer_handler(void * p_context)
 void ppi_Setting(void)
 {
     nrf_gpio_cfg_output(GPIO_OUTPUT_PIN_NUMBER);
-		nrf_gpio_pin_write(GPIO_OUTPUT_PIN_NUMBER,0);
+		nrf_gpio_pin_write(GPIO_OUTPUT_PIN_NUMBER,1);
 		app_timer_create(&Lesson3LedTimer, APP_TIMER_MODE_REPEATED, Lesson3LedTimer_handler);
 		app_timer_start(Lesson3LedTimer, LESSON3_LED2_MEAS_INTERVAL1, NULL);
 }

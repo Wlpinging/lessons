@@ -60,14 +60,10 @@
 .\_build\spi_trans.o: ..\..\..\..\..\..\components\libraries\util\sdk_os.h
 .\_build\spi_trans.o: ..\..\..\..\..\..\components\libraries\util\sdk_macros.h
 .\_build\spi_trans.o: ..\..\..\..\..\..\components\libraries\experimental_section_vars\nrf_section.h
-.\_build\spi_trans.o: ..\..\..\..\..\..\components\libraries\strerror\nrf_strerror.h
 .\_build\spi_trans.o: ..\..\..\..\..\..\components\libraries\log\src\nrf_log_internal.h
 .\_build\spi_trans.o: ..\..\..\..\..\..\components\libraries\log\nrf_log_instance.h
 .\_build\spi_trans.o: ..\..\..\..\..\..\components\libraries\log\nrf_log_types.h
 .\_build\spi_trans.o: ..\..\..\..\..\..\components\libraries\log\nrf_log_ctrl.h
 .\_build\spi_trans.o: ..\..\..\..\..\..\components\libraries\log\src\nrf_log_ctrl_internal.h
 .\_build\spi_trans.o: ..\..\..\..\..\..\components\libraries\log\nrf_log_backend_interface.h
-.\_build\spi_trans.o: ..\..\..\..\..\..\components\libraries\memobj\nrf_memobj.h
-.\_build\spi_trans.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
-.\_build\spi_trans.o: ..\..\..\..\..\..\components\libraries\balloc\nrf_balloc.h
 .\_build\spi_trans.o: ..\..\..\..\..\..\components\libraries\log\nrf_log_default_backends.h

@@ -233,7 +233,8 @@ int fdsmem_init(void)
 }
 
 
-
+extern volatile bool Notify_Flag;
+extern volatile uint8_t Notify_buffer[4]; 
 uint32_t record_rd(void)
 {
     fds_find_token_t tok   = {0};
@@ -286,6 +287,11 @@ uint32_t record_rd(void)
                         frec_c.p_header->record_key,
                         len);
 				configuration_t* conf = (configuration_t* )frec_c.p_data;
+				Notify_buffer[0]=((conf->device_data) >>24);
+				Notify_buffer[1]=((conf->device_data) >>16);
+				Notify_buffer[2]=((conf->device_data) >>8);
+				Notify_buffer[3]=((conf->device_data) );
+				Notify_Flag = 1;
 				return conf->device_data;
 		}
 		else return 0;
@@ -305,6 +311,11 @@ void record_write( uint32_t p_data)
         .data.length_words = (sizeof(m_dummy_cfg) + 3) / sizeof(uint32_t)
     };
     ret_code_t rc = fds_record_write(NULL, &rec);
+		Notify_buffer[0]=(p_data >>24);
+		Notify_buffer[1]=(p_data >>16);
+		Notify_buffer[2]=(p_data >>8);
+		Notify_buffer[3]=(p_data);
+		Notify_Flag = 1;
     if (rc != NRF_SUCCESS)
     {
         NRF_LOG_INFO("error: fds_record_write() returned %s.\n", fds_err_str(rc));
@@ -317,6 +328,11 @@ void record_update(void)
 			PreValue= record_rd() + 1;
 			record_write(PreValue);
 			NRF_LOG_INFO("data is%8x.",record_rd());
+			Notify_buffer[0]=(PreValue >>24);
+			Notify_buffer[1]=(PreValue >>16);
+			Notify_buffer[2]=(PreValue >>8);
+			Notify_buffer[3]=(PreValue);
+			Notify_Flag = 1;
 }
 /**
  * @}

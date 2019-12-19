@@ -69,6 +69,7 @@ static const uint8_t m_length = 8;        /**< Transfer length. */
 
 extern volatile bool Notify_Flag;
 extern volatile uint8_t Notify_buffer[4]; 
+static uint8_t buffer[4];
 void spi_event_handler(nrf_drv_spi_evt_t const * p_event,
                        void *                    p_context)
 {
@@ -78,18 +79,21 @@ void spi_event_handler(nrf_drv_spi_evt_t const * p_event,
 				NRF_LOG_INFO("Read completed.Received: ");
         NRF_LOG_HEXDUMP_INFO(m_rx_buf+4, 4);	
 				memcpy((void*) Notify_buffer,m_rx_buf+4,4);
+				memcpy((void*) buffer,m_rx_buf+4,4);
 				Notify_Flag = 1;
     }
 		else if ((m_tx_buf[0] == 'W')&&(m_tx_buf[1] == 'R')&&(m_tx_buf[2] == 'I')&&(m_tx_buf[3] == 'T'))
     {
 				NRF_LOG_INFO("Write completed. %2x,%2x,%2x,%2x",m_tx_buf[4],m_tx_buf[5],m_tx_buf[6],m_tx_buf[7]);
 				memcpy((void*)Notify_buffer,m_tx_buf+4,4);
+				memcpy((void*) buffer,m_rx_buf+4,4);
 				Notify_Flag = 1;
 		}
 		else if ((m_tx_buf[0] == 'U')&&(m_tx_buf[1] == 'P')&&(m_tx_buf[2] == 'D')&&(m_tx_buf[3] == 'A'))
     {
 				NRF_LOG_INFO("Update completed. ");
-				Notify_buffer[3]++;
+				buffer[3]++;
+				memcpy((void*)Notify_buffer,buffer,4);
 				Notify_Flag = 1;				
 		}
 }

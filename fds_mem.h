@@ -68,11 +68,18 @@ uint32_t spi_read(void);
  */
 void spi_write(uint8_t * ptr);
 
-/**@brief Function for spi write update last value
+/**@brief Function for spi update last value
  */
 void spi_update(void);
-
-
+/**@brief Function for twi read value
+ */
+void twi_read(void);
+/**@brief Function for twi write last value
+ */
+void twi_write(uint8_t * pdata);
+/**@brief Function for twi update last value
+ */
+void twi_update(void);
 
 typedef uint32_t (* Profile_Read_handler_t) (void);
 typedef void (* Profile_Write_handler_t) (uint32_t p_data);
@@ -86,6 +93,9 @@ typedef struct
 		Profile_Read_handler_t 		spi_Read_handler; /**< Read_handler to sepcified interface. */
 		SPI_Write_handler_t 			spi_Write_handler;
 		Profile_Update_handler_t 	spi_Update_handler;
+		Profile_Update_handler_t 	twi_Read_handler; /**< Read_handler to sepcified interface. */
+		SPI_Write_handler_t 			twi_Write_handler;
+		Profile_Update_handler_t 	twi_Update_handler;
 	
 } _nus_interface;
 

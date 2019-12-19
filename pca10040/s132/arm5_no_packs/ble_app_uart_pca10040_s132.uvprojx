@@ -412,6 +412,16 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\spi_trans.c</FilePath>
             </File>
+            <File>
+              <FileName>eeprom_simulator.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\eeprom_simulator.c</FilePath>
+            </File>
+            <File>
+              <FileName>twi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\twi.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1662,6 +1672,26 @@
               <FileName>nrfx_spim.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_spim.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf_drv_twi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\integration\nrfx\legacy\nrf_drv_twi.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrfx_twi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_twi.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrfx_twim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_twim.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrfx_twis.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_twis.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -4149,6 +4179,16 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\spi_trans.c</FilePath>
             </File>
+            <File>
+              <FileName>eeprom_simulator.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\eeprom_simulator.c</FilePath>
+            </File>
+            <File>
+              <FileName>twi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\twi.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -5399,6 +5439,26 @@
               <FileName>nrfx_spim.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_spim.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf_drv_twi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\integration\nrfx\legacy\nrf_drv_twi.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrfx_twi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_twi.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrfx_twim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_twim.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrfx_twis.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_twis.c</FilePath>
             </File>
           </Files>
         </Group>

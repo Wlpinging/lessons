@@ -91,7 +91,7 @@
 
 #define APP_BLE_CONN_CFG_TAG            1                                           /**< A tag identifying the SoftDevice BLE configuration. */
 
-#define DEVICE_NAME                     "William_UART"                               /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "培训"                               					/**< Name of device. Will be included in the advertising data. */
 #define NUS_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN                  /**< UUID type for the Nordic UART Service (vendor specific). */
 
 #define APP_BLE_OBSERVER_PRIO           3                                           /**< Application's BLE observer priority. You shouldn't need to modify this value. */
@@ -116,11 +116,12 @@
 
 #define DEAD_BEEF                       0xDEADBEEF                                  /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
-
 BLE_BAS_DEF(m_bas);
 
 #define UART_TX_BUF_SIZE                256                                         /**< UART TX buffer size. */
 #define UART_RX_BUF_SIZE                256                                         /**< UART RX buffer size. */
+#define USER_DFU
+
 
 BLE_NUS_DEF(m_nus, NRF_SDH_BLE_TOTAL_LINK_COUNT);                                   /**< BLE NUS service instance. */
 NRF_BLE_GATT_DEF(m_gatt);                                                           /**< GATT module instance. */
@@ -228,7 +229,8 @@ void UartTimer_handler(void * p_context)
 
 		if((data_array[0] == 2)&&(data_array[1] == 4))
 		{
-					NRF_LOG_INFO("fds readback value=%d\n",nus_interface.fds_Read_handler());
+					uint32_t value = nus_interface.fds_Read_handler();
+					NRF_LOG_INFO("fds readback value=%d\n",value);
 		}
 		else if((data_array[0] == 1)&&(data_array[1] == 4))
 		{
@@ -242,8 +244,8 @@ void UartTimer_handler(void * p_context)
 		}
 		else if((data_array[0] == 5)&&(data_array[1] == 4))
 		{
-					uint32_t ptr=spi_read();
-					NRF_LOG_INFO("spi readback %8x",ptr);
+					uint32_t value=nus_interface.spi_Read_handler();
+					NRF_LOG_INFO("spi readback %8x",value);
 		}
 		else if((data_array[0] == 4)&&(data_array[1] == 4))
 		{	
@@ -254,6 +256,21 @@ void UartTimer_handler(void * p_context)
 		{
 					nus_interface.spi_Update_handler();
 					NRF_LOG_INFO("fds Update_OK");
+		}
+		else if((data_array[0] == 8)&&(data_array[1] == 4))
+		{
+					nus_interface.twi_Read_handler();
+					NRF_LOG_INFO("twi readback OK");
+		}
+		else if((data_array[0] == 7)&&(data_array[1] == 4))
+		{	
+					nus_interface.twi_Write_handler(data_array+2 );
+					NRF_LOG_INFO("twi Write_OK");
+		}
+		else if((data_array[0] == 9)&&(data_array[1] == 0))
+		{
+					nus_interface.twi_Update_handler();
+					NRF_LOG_INFO("twi Update_OK");
 		}
 		index = 0;
 		memset(data_array, 0, sizeof(data_array));
@@ -504,23 +521,23 @@ static void services_init(void)
 		err_code = dis_service_init();
     APP_ERROR_CHECK(err_code);
 		
-//#ifdef DFU_SUPPORT
+#ifdef USER_DFU
 
-//    ble_dfu_buttonless_init_t dfus_init = {0};
+    ble_dfu_buttonless_init_t dfus_init = {0};
 
-//    // Initialize the async SVCI interface to bootloader.
+    // Initialize the async SVCI interface to bootloader.
 
-//    err_code = ble_dfu_buttonless_async_svci_init();
+    err_code = ble_dfu_buttonless_async_svci_init();
 
-//    APP_ERROR_CHECK(err_code); 
+    APP_ERROR_CHECK(err_code); 
 
-//    dfus_init.evt_handler = ble_dfu_evt_handler; 
+    dfus_init.evt_handler = ble_dfu_evt_handler; 
 
-//    err_code = ble_dfu_buttonless_init(&dfus_init);
+    err_code = ble_dfu_buttonless_init(&dfus_init);
 
-//    APP_ERROR_CHECK(err_code);
+    APP_ERROR_CHECK(err_code);
 
-//#endif
+#endif
 		
 }
 
@@ -877,6 +894,9 @@ static void uart_init(void)
 		nus_interface.spi_Read_handler = spi_read;
 		nus_interface.spi_Write_handler = spi_write;
 		nus_interface.spi_Update_handler = spi_update;
+		nus_interface.twi_Read_handler = twi_read;
+		nus_interface.twi_Write_handler = twi_write;
+		nus_interface.twi_Update_handler = twi_update;
 }
 /**@snippet [UART Initialization] */
 
